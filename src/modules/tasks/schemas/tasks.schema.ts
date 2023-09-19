@@ -1,7 +1,7 @@
 import { Schema, Prop, SchemaFactory} from '@nestjs/mongoose';
 
 @Schema()
-export class Tasks {
+export class Task {
     @Prop()
     title: string;
 
@@ -9,8 +9,9 @@ export class Tasks {
     body: string;
 
     @Prop()
-    author: string;
+    Priority: number;
+
 }
 
 
-export const TaskSchema = SchemaFactory.createForClass(Tasks);
+export const TaskSchema = SchemaFactory.createForClass(Task);
