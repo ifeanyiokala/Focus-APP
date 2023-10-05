@@ -6,11 +6,19 @@ export class Task {
     title: string;
 
     @Prop()
+    id: number;
+
+    @Prop()
     body: string;
 
     @Prop()
     Priority: number;
 
+    @Prop()
+    dueDate: Date;
+
+    @Prop()
+    category_id: number;
 }
 
 
