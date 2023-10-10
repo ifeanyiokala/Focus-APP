@@ -47,15 +47,15 @@ export class TasksController {
 
   @Patch('id/date')
   async setTaskDate(@Param('id') id: string, @Body('dueDate') dueDate: Date): Promise<Task> {
-  try  {
-    const updatedTask = await this.tasksService.setTaskDate(id, dueDate);
-    if (!updatedTask) {
-      throw new NotFoundException ('Task with ID ${taskId} not found.');
+    try  {
+      const updatedTask = await this.tasksService.setTaskDate(id, dueDate);
+      if (!updatedTask) {
+        throw new NotFoundException ('Task with ID ${taskId} not found.');
+      }
+      return updatedTask;
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
-    return updatedTask;
-  } catch (error) {
-    throw new NotFoundException(error.message);
-  }
 } 
   @Get('id/date')
   async findAllTaskDueToday(): Promise<{ tasks: Task[] }> {
@@ -86,8 +86,40 @@ export class TasksController {
   ): Promise<Task>{ return this.tasksService.delete_category(id,category_id)
 
   }
+
+  @Get('id/status')
+  async getupdated_status(@Param('id') id: string) {
+    try {
+      const status = await this.tasksService.getupdated_status(id);
+      return { status };
+    } catch (error) {
+      throw new Error('Failed to get task status: ${error.message}')
+    }
+    }
+
+
+
   @Put('id/status')
+  async update_status(
+    @Param('id')id: string,
+    @Body('updated_status') updated_status: string): Promise<Task> {
+      try  {
+        const updatedstatus = await this.tasksService.update_status(id, updated_status);
+        return {task: updatedstatus};
+      } catch (error) {
+        throw new NotFoundException(error.message);  
+      }
+    }
+
+    @Get('comleted')
+    findAllCompletedTasks(): any[] {
+      return this.tasksService.findAllCompletedTasks();
+    }
   
+    @Get('incomplete')
+    findAllIncompletedTasks(): any [] {
+      return this.tasksService.getIncompletedTasks();
+    }
 }
 
 

@@ -19,6 +19,12 @@ export class Task {
 
     @Prop()
     category_id: number;
+
+    @Prop()
+    task_status: string
+
+    @Prop({default: false})
+    completed: boolean;
 }
 
 

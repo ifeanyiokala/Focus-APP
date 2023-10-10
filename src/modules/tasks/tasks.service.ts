@@ -93,8 +93,8 @@ export class TasksService {
     return 'Category removed successfully';
   }
 
-  private findTaskById(taskId: string) {
-    const task = this.tasks.find((t) => t.id === taskId);
+  async findTaskById(taskId: string) {
+    const task =await  this.tasks.find((t) => t.id === taskId);
 
     if (!task) {
       throw new NotFoundException('Task not found');
@@ -102,8 +102,32 @@ export class TasksService {
 
     return task; 
   }
-    
+  async update_status(id: string, task_status: string): Promise<Task> {
+    const taskupdate = await this.tasks.find((task) => task.id === id);
+    taskupdate.status = task_status;
+    return taskupdate;
+
   }
+
+  async getupdated_status(id: string): Promise<string | undefined> {
+    const task = this.task[id];
+    if (task) {
+      return task.status;
+    }
+    throw new Error('Task not found');
+}
+
+async findAllCompletedTasks(): any[] {
+  return await this.tasks.filter(task => task.completed);
+}
+
+async getIncompletedTask(): any[] {
+  return await this.tasks.filter(task => !task.completed);
+}
+
+}
+
+
 
   
 
