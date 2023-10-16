@@ -1,15 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
+import { Task } from './entities/task.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { Task } from './schemas/tasks.schema';
+//import { Task } from './schemas/tasks.schema';
 import { Model } from 'mongoose';
 import { Category } from '../category/schemas/category.schema';
 
 
 @Injectable()
 export class TasksService {
-  constructor(@InjectModel(Task) private readonly taskModel: Model<Task> ) {}
+  constructor(@InjectModel('Task') private readonly taskModel: Model<Task> ) {}
 
   async findAll(): Promise<Task[]> {
     return await this.taskModel.find().exec();
@@ -33,32 +32,36 @@ export class TasksService {
   }
 
   async updateTaskPriority(taskId: string, priority: string): Promise<Task> {
-    const taskToupdate = await this.taskModel.find((task) => task.id === taskId);
+    const taskToupdate = await this.taskModel.findOneAndUpdate((task) => task.id === taskId);
     taskToupdate.priority = priority;
     return taskToupdate ;
   
+  } 
 
-  private tasks = [
-    { id : 1, title: 'Task1 1', priority : 'high'},
-    { id : 2, title: 'Task 2', priority : 'medium'},
-    { id : 3, title: 'Task 3', priority : 'low'},
-  ];
 
   async geTasksByPriority(priority: String) {
-    return this.tasks.filter(task => task.priority === priority);
+    return this.taskModel.find(task => task.priority === priority);
   }
-}
-  private tasks_date: { [id : string]: {dueDate: Date} } = {};
-
+  
   async setTaskDate(id: string, dueDate: Date) {
-    if (!this.tasks_date[id]) {
-      throw new NotFoundException('Task with ${id} not found.');
+    
+    try {
+      const task = await this.taskModel.findById(id); 
+
+      if (!task) {
+        throw new NotFoundException('Task with ${id} not found.');
     }
 
-    this.tasks_date[id].dueDate = dueDate;
-    return this.tasks_date[id];
+      task.dueDate = dueDate;
+      await task.save();
+
+      return task;
+    } catch (error) {
+      throw new NotFoundException('Error updating task due date: ${error.message');
+    }
 
   }
+
 
   async findAllTaskDueToday(): Promise<Task[]> {
     const today = new Date();
@@ -71,18 +74,34 @@ export class TasksService {
   }
 
   async assignCategory(id: string, category_id: string): Promise<Task> {
-    const tasks = this.task.find((t) => t.id === id);
-  }
+    try {
 
-  if (!task){
-    throw new NotFoundException('Task not found');
-  }
-  tasks.category_id = category_id;
-  return task; 
-  
-  async delete_category(id: string, category_id: string): string{
-    const task = this.findTaskById(id);
-    const categoryIndex = task.categories.findIndex((catId => catId === categoryId),);
+    
+      const tasks = await this.taskModel.findById(id);
+
+      if (!tasks){
+        throw new NotFoundException('Task not found');
+      
+      }
+    
+      tasks.category_id = category_id;
+      await tasks.save();
+
+      return tasks;
+    } catch (error) {
+      throw new Error('Error assigning category:' + error.message);
+    }
+}
+
+  async delete_category(id: string, category_id: string): Promise<string> {
+    
+    const task: Task = await this.taskModel.findById(id);
+
+    if(!task) {
+      throw new NotFoundException('Task not found');
+    }
+
+    const categoryIndex = task.categories.findIndex((catId) => catId === category_id);
 
     if (categoryIndex === -1 ) {
         throw new NotFoundException('Category not found for this task');
@@ -90,11 +109,13 @@ export class TasksService {
 
     task.categories.splice(categoryIndex,1);
 
+    this.taskModel.updateOne(task)
+
     return 'Category removed successfully';
   }
 
   async findTaskById(taskId: string) {
-    const task =await  this.tasks.find((t) => t.id === taskId);
+    const task = await  this.taskModel.find((t) => t.id === taskId);
 
     if (!task) {
       throw new NotFoundException('Task not found');
@@ -103,31 +124,60 @@ export class TasksService {
     return task; 
   }
   async update_status(id: string, task_status: string): Promise<Task> {
-    const taskupdate = await this.tasks.find((task) => task.id === id);
-    taskupdate.status = task_status;
-    return taskupdate;
+    const taskupdate = await this.taskModel.findByIdAndUpdate(id, {status: task_status}, {new: true});
+    
+    if (!taskupdate) {
+      throw new NotFoundException('Task not found');
+    }
 
+    return taskupdate;
   }
 
   async getupdated_status(id: string): Promise<string | undefined> {
-    const task = this.task[id];
+    const task = this.taskModel[id];
     if (task) {
       return task.status;
     }
     throw new Error('Task not found');
 }
 
-async findAllCompletedTasks(): any[] {
-  return await this.tasks.filter(task => task.completed);
+async findAllCompletedTasks(): Promise<any[]> {
+  return await this.taskModel.find({completed:true});
 }
 
-async getIncompletedTask(): any[] {
-  return await this.tasks.filter(task => !task.completed);
+async getIncompletedTask(): Promise<any[]> {
+  return await this.taskModel.find({completed: false});
 }
 
+async sortTasks(sortBy: string): Promise<Task[]> {
+  return this.taskModel.find({ order: {[ sortBy]: 'ASC'}});
 }
 
+async filterTasks(Category: string, status: string): Promise<Task[]> {
+  const whereClause = {};
+  if (Category) whereClause['category'] = Category;
+  if (status) whereClause['status'] = status; 
+  return this.taskModel.find({ where: whereClause});
+}
 
+async shareTask(id: string, sharedWithUserId: string): Promise<Task> {
+
+  const task = await this.taskModel.findById(id);
+
+  if (!task) {
+    throw new Error('Task not found');
+  }
+
+  task.sharedWith.push(sharedWithUserId);
+
+  return task.save();
+
+}
+  async getSharedTasks(id: string): Promise<Task[]> {
+    return this.taskModel.find({ sharedWith: id}).exec();
+
+  }
+}
 
   
 

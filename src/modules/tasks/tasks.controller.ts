@@ -35,7 +35,7 @@ export class TasksController {
   
   @Put(':id/priority')
   async updateTaskPriority(@Param('id') id: string, @Body('priority') priority : string): Promise<Task> {
-    return await this.tasksService.updateTaskPriority(taskId, priority);
+    return await this.tasksService.updateTaskPriority(id, priority);
     //return await this.tasksService.updatePriority(id, priority );
     
   }
@@ -111,15 +111,33 @@ export class TasksController {
       }
     }
 
-    @Get('comleted')
-    findAllCompletedTasks(): any[] {
-      return this.tasksService.findAllCompletedTasks();
-    }
+  @Get('comleted')
+  findAllCompletedTasks(): any[] {
+    return this.tasksService.findAllCompletedTasks();
+  }
   
-    @Get('incomplete')
-    findAllIncompletedTasks(): any [] {
-      return this.tasksService.getIncompletedTasks();
+  @Get('incomplete')
+  findAllIncompletedTasks(): any [] {
+    return this.tasksService.getIncompletedTasks();
+  }
+
+  @Post('id/shared')
+  async shareTask(
+    @Param('id') id: string,
+    @Body('sharedWithUserId') sharedWithUserId: string,
+  ) {
+    try {
+      const sharedTask = await this.tasksService.shareTask(id, sharedWithUserId);
+      return sharedTask;
+    } catch (error) {
+      return  { error: error.message} ;
     }
+  }
+
+  @Get('id/shared')
+  async getsharedTasks(id: string) {
+    return  await this.tasksService.getSharedTasks(id);
+  }
 }
 
 

@@ -21,10 +21,19 @@ export class Task {
     category_id: number;
 
     @Prop()
-    task_status: string
+    task_status: string;
 
     @Prop({default: false})
     completed: boolean;
+
+    @Prop()
+    categories: Array<string>;
+
+    @Prop()
+    status: Array<string>;
+
+    @Prop()
+    sharedWith: Array<string>;
 }
 
 

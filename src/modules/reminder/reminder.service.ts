@@ -1,26 +1,29 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReminderDto } from './dto/create-reminder.dto';
 import { UpdateReminderDto } from './dto/update-reminder.dto';
+import { Task } from '../tasks/entities/task.entity';
+
 
 @Injectable()
 export class ReminderService {
-  create(createReminderDto: CreateReminderDto) {
-    return 'This action adds a new reminder';
+  private reminders: Map<number, Date> = new Map();
+
+  createReminder(id: number, reminderAt: Date): void {
+    this.reminders.set(id, reminderAt);
   }
 
-  findAll() {
-    return `This action returns all reminder`;
+  updateReminder(id: number, remindAt: Date): void {
+    if (!this.reminders.has(id)) {
+      throw new NotFoundException('Reminder for task with ID ${id} not found.');
+    }
+    this.reminders.set(id, remindAt);
+  }
+  
+  getReminder(id: number): Date {
+    return this.reminders.get(id);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} reminder`;
-  }
-
-  update(id: number, updateReminderDto: UpdateReminderDto) {
-    return `This action updates a #${id} reminder`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} reminder`;
+  clearReminder(id: number): void {
+    this.reminders.delete(id);
   }
 }
