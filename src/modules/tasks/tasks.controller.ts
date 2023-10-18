@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, Patch, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, Patch, NotFoundException, Query } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -137,6 +137,21 @@ export class TasksController {
   @Get('id/shared')
   async getsharedTasks(id: string) {
     return  await this.tasksService.getSharedTasks(id);
+  }
+
+  @Post('id/archive')
+  async archiveTask(@Param('id') id: string) {
+    return await this.tasksService.archiveTask(id);
+  }
+
+  @Get('archived')
+  async getArchivedTask() {
+    return await this.tasksService.getarchiveTask();
+  }
+
+  @Get('id/history')
+  async getTaskHistory(id: string) {
+    return await this.tasksService.getTaskHistory(id);
   }
 }
 

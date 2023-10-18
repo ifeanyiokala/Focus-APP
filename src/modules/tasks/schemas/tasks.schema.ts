@@ -34,6 +34,15 @@ export class Task {
 
     @Prop()
     sharedWith: Array<string>;
+
+    @Prop()
+    keyword: Array<string>;
+
+    @Prop()
+    description: string;
+
+    @Prop()
+    archive: boolean;
 }
 
 

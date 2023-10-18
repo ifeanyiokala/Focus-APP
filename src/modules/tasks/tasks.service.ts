@@ -177,6 +177,18 @@ async shareTask(id: string, sharedWithUserId: string): Promise<Task> {
     return this.taskModel.find({ sharedWith: id}).exec();
 
   }
+
+  async archiveTask(id: string, ): Promise<Task> {
+      return await this.taskModel.findByIdAndUpdate(id, {archive: true}, {new: true}).exec();
+  }
+
+  async getarchiveTask(): Promise<Task[]> {
+    return await this.taskModel.find({archive: true}); 
+  }
+
+  async getTaskHistory(id: string): Promise<Task> {
+    return await this.taskModel.findById(id).exec();
+  }
 }
 
   

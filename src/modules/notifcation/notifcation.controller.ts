@@ -1,34 +1,21 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { NotifcationService } from './notifcation.service';
+import { Notification } from "./notification.model"
 import { CreateNotifcationDto } from './dto/create-notifcation.dto';
 import { UpdateNotifcationDto } from './dto/update-notifcation.dto';
+import { notifcation } from './entities/notifcation.entity';
 
 @Controller('notifcation')
 export class NotifcationController {
   constructor(private readonly notifcationService: NotifcationService) {}
 
-  @Post()
-  create(@Body() createNotifcationDto: CreateNotifcationDto) {
-    return this.notifcationService.create(createNotifcationDto);
-  }
-
   @Get()
-  findAll() {
-    return this.notifcationService.findAll();
+  async getAllNotifications(): Promise<Notification[]> {
+    return this.notifcationService.getAllNotifications();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.notifcationService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNotifcationDto: UpdateNotifcationDto) {
-    return this.notifcationService.update(+id, updateNotifcationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.notifcationService.remove(+id);
+  @Patch('mark-read/id')
+  async markNotificationAsRead(@Param('id') id: string): Promise<Notification> {
+    return this.notifcationService.markNotificationAsRead(id);
   }
 }

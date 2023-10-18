@@ -34,6 +34,16 @@ export class Task {
   @Column()
   sharedWith: Array<string>;
 
+  @Column()
+  keyword: Array<string>;
+
+  @Column()
+  description: string;
+
+  @Column()
+  archive: string;
+
+
 
   // Add more fields like dueDate, priority, etc. as needed
 
